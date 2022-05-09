@@ -1,20 +1,23 @@
-import {AnyEventHandlerMap, EventHandler} from "./common";
+import {AnyEventHandlerMap, EventHandler, WrapToAny} from "./common";
+import {Delete, Ignore, Index, Update, UpdateScript} from "./compiled/proto/project";
 
-export const project = <T>(eventType: string, handler: EventHandler<T>): AnyEventHandlerMap => {
-    return {eventType, handler}
-};
+export type ValidResult = Index | Update | Delete | Ignore | UpdateScript;
 
-export const index = <T>(eventType: string, handler: (event: T) => { id: string, doc: object }): AnyEventHandlerMap =>
-    project<T>(eventType, e => {
-        const result = handler(e);
-        const doc = JSON.stringify(result.doc);
-        return {index: {document: doc, id: result.id}};
+export function project<T>(eventType: string, handler: EventHandler<T>): AnyEventHandlerMap {
+    // @ts-ignore
+    return {eventType, handler: x => handler(x as T)};
+}
+
+export function index<T>(eventType: string, handler: (event: T) => { id: string, document: object }): AnyEventHandlerMap {
+    return project<T>(eventType, e => {
+        const idx = Index.fromPartial(handler(e));
+        return WrapToAny(idx);
     });
+}
 
-export const update = <T>(eventType: string, handler: (event: T) => { id: string, doc: object }): AnyEventHandlerMap =>
+export const update = <T>(eventType: string, handler: (event: T) => { id: string, document: object }): AnyEventHandlerMap =>
     project<T>(eventType, e => {
-        const result = handler(e);
-        const updateDoc = JSON.stringify(result.doc);
-        return {update: {id: result.id, document: updateDoc}};
+        const result = Update.fromPartial(handler(e));
+        return WrapToAny(result);
     });
 
