@@ -47,7 +47,7 @@ const getProjectionServer = (projector: Projector): ProjectionServer => {
                             operation: handler(ctx.eventPayload),
                             metadata: {}
                         });
-                        console.log(`(server) Responding with: ${JSON.stringify(result)}`);
+                        console.log(`(server) Responding with: ${result.operation?.$type}`);
                         call.write(result);
                     } else {
                         console.log(`(server) No handler found for event: ${ctx.eventType}`);
