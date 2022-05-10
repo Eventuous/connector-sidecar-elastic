@@ -1,12 +1,7 @@
-import {AnyEventHandlerMap, EventHandler, WrapToAny} from "./common";
+import {AnyEventHandlerMap, project, WrapToAny} from "./common";
 import {Delete, Ignore, Index, Update, UpdateScript} from "./compiled/proto/project";
 
 export type ValidResult = Index | Update | Delete | Ignore | UpdateScript;
-
-export function project<T>(eventType: string, handler: EventHandler<T>): AnyEventHandlerMap {
-    // @ts-ignore
-    return {eventType, handler: x => handler(x as T)};
-}
 
 export function index<T>(eventType: string, handler: (event: T) => { id: string, document: object }): AnyEventHandlerMap {
     return project<T>(eventType, e => {

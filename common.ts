@@ -24,6 +24,11 @@ export function WrapToAny(event: ValidResult): Any {
     });
 }
 
+export function project<T>(eventType: string, handler: EventHandler<T>): AnyEventHandlerMap {
+    // @ts-ignore
+    return {eventType, handler: x => handler(x as T)};
+}
+
 const getProjectionServer = (projector: Projector): ProjectionServer => {
     const projections = new Map(projector.map(obj => [obj.eventType, obj.handler]));
     const ignored: Any = WrapToAny(Ignore.fromJSON({}));
